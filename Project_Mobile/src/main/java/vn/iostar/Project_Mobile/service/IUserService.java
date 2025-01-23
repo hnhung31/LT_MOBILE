@@ -29,4 +29,7 @@ public interface IUserService {
 
 	void saveActive(String email);
 
+	boolean verifyOtpForgotPassword(String email, String otp);
+	boolean resetPassword(String email, String newPassword);
+
 }
