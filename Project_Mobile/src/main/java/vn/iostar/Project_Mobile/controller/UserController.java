@@ -2,8 +2,10 @@ package vn.iostar.Project_Mobile.controller;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +21,8 @@ public class UserController {
 
     private final IUserService userService;
     private final IEmailService emailService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // Constructor-based injection for userService and emailService
     public UserController(IUserService userService, IEmailService emailService) {
@@ -28,12 +32,20 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
+        // Tìm kiếm người dùng bằng username
         Optional<User> userOpt = userService.findByUsername(loginRequest.getUsername());
-        if (!userOpt.isPresent() || !userOpt.get().getPassword().equals(loginRequest.getPassword())) {
+
+        // Kiểm tra nếu không tìm thấy user hoặc mật khẩu không khớp
+        if (!userOpt.isPresent() || 
+            !passwordEncoder.matches(loginRequest.getPassword(), userOpt.get().getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Thông tin đăng nhập không chính xác!");
         }
+
+        // Đăng nhập thành công
         return ResponseEntity.ok("Đăng nhập thành công.");
     }
+
+    
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
