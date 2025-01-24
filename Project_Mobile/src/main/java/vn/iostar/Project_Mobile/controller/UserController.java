@@ -76,8 +76,10 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Mật khẩu xác nhận không khớp.");
         }
 
+        String encodedPassword = passwordEncoder.encode(newPassword);
+
         // Cập nhật mật khẩu
-        boolean isReset = userService.resetPassword(email, newPassword);
+        boolean isReset = userService.resetPassword(email, encodedPassword);
         if (isReset) {
             return ResponseEntity.ok("Mật khẩu đã được đặt lại thành công.");
         } else {
