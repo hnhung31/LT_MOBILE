@@ -79,5 +79,34 @@ public class UserService implements IUserService{
 		    return false;
 		}
 
+		@Override
+		public boolean verifyOtpForgotPassword(String email, String otp) {
+		    Optional<User> userOpt = userRepository.findByEmail(email);
+		    if (!userOpt.isPresent()) {
+		        return false; // Không tìm thấy user
+		    }
 
+		    User user = userOpt.get();
+		    // Kiểm tra OTP và thời gian hết hạn
+		    if (user.getOtpCode() != null && user.getOtpCode().equals(otp) && user.getOtpExpiration().isAfter(LocalDateTime.now())) {
+		        return true;
+		    }
+		    return false;
+		}
+
+		@Override
+		public boolean resetPassword(String email, String newPassword) {
+		    Optional<User> userOpt = userRepository.findByEmail(email);
+		    if (userOpt.isPresent()) {
+		        User user = userOpt.get();
+		        user.setPassword(newPassword); // Mã hóa mật khẩu nếu cần
+		        user.setOtpCode(null); // Xóa OTP sau khi reset thành công
+		        user.setOtpExpiration(null); // Xóa thời gian hết hạn OTP
+		        userRepository.save(user);
+		        return true;
+		    }
+		    return false;
+		}
+
+		
 }
